@@ -25,6 +25,7 @@ export function useTranslation({ targetLanguage, sourceLanguage, onStateChange }
   const sourceStreamRef = useRef<MediaStream | null>(null);
   const sessionClosingRef = useRef(false);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const connectionIdRef = useRef(0);
 
   const updateState = useCallback((newState: Partial<TranslationState>) => {
     setState(prev => {
@@ -42,6 +43,7 @@ export function useTranslation({ targetLanguage, sourceLanguage, onStateChange }
   }, []);
 
   const cleanup = useCallback(() => {
+    connectionIdRef.current += 1;
     clearCloseTimeout();
     if (dataChannelRef.current) {
       try {
@@ -103,8 +105,10 @@ export function useTranslation({ targetLanguage, sourceLanguage, onStateChange }
   }, [cleanup, finalizeStop, clearCloseTimeout]);
 
   const start = useCallback(async () => {
+    cleanup();
+    const currentConnectionId = connectionIdRef.current;
+
     try {
-      cleanup();
       updateState({
         status: 'connecting',
         errorMessage: null,
@@ -119,7 +123,11 @@ export function useTranslation({ targetLanguage, sourceLanguage, onStateChange }
         body: JSON.stringify({ targetLanguage }),
       });
 
+      if (currentConnectionId !== connectionIdRef.current) return;
+
       const sessionData = await sessionResponse.json();
+
+      if (currentConnectionId !== connectionIdRef.current) return;
 
       if (!sessionResponse.ok) {
         setIsActive(false);
@@ -134,6 +142,12 @@ export function useTranslation({ targetLanguage, sourceLanguage, onStateChange }
       }
 
       const sourceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      if (currentConnectionId !== connectionIdRef.current) {
+        sourceStream.getTracks().forEach(track => track.stop());
+        return;
+      }
+      
       sourceStreamRef.current = sourceStream;
 
       const pc = new RTCPeerConnection();
@@ -198,7 +212,9 @@ export function useTranslation({ targetLanguage, sourceLanguage, onStateChange }
       };
 
       const offer = await pc.createOffer();
+      if (currentConnectionId !== connectionIdRef.current) return;
       await pc.setLocalDescription(offer);
+      if (currentConnectionId !== connectionIdRef.current) return;
 
       const sdpResponse = await fetch(
         'https://api.openai.com/v1/realtime/translations/calls',
@@ -212,6 +228,8 @@ export function useTranslation({ targetLanguage, sourceLanguage, onStateChange }
         }
       );
 
+      if (currentConnectionId !== connectionIdRef.current) return;
+
       if (!sdpResponse.ok) {
         const errorText = await sdpResponse.text();
         clearCloseTimeout();
@@ -221,6 +239,7 @@ export function useTranslation({ targetLanguage, sourceLanguage, onStateChange }
       }
 
       const answerSdp = await sdpResponse.text();
+      if (currentConnectionId !== connectionIdRef.current) return;
       await pc.setRemoteDescription({
         type: 'answer',
         sdp: answerSdp,
