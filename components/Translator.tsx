@@ -4,17 +4,15 @@ import { useState } from 'react';
 import { MicButton } from './MicButton';
 import { StatusIndicator } from './StatusIndicator';
 import { useTranslation } from './useTranslation';
-import { SOURCE_LANGUAGES, SourceLanguage } from '@/lib/types';
+import { SOURCE_LANGUAGES, SourceLanguage, TARGET_LANGUAGES, TargetLanguage } from '@/lib/types';
 import styles from './Translator.module.css';
-
-const TARGET_LANGUAGE_CODE = 'pt';
-const TARGET_LANGUAGE_LABEL = 'Portuguese';
 
 export function Translator() {
   const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage>('en');
+  const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>('pt');
 
   const { state, start, stop, isActive, isStopping } = useTranslation({
-    targetLanguage: TARGET_LANGUAGE_CODE,
+    targetLanguage,
     sourceLanguage,
   });
 
@@ -29,6 +27,7 @@ export function Translator() {
 
   const isConnecting = state.status === 'connecting';
   const sourceLanguageLabel = SOURCE_LANGUAGES.find(l => l.value === sourceLanguage)?.label || 'English';
+  const targetLanguageLabel = TARGET_LANGUAGES.find(l => l.value === targetLanguage)?.label || 'Portuguese';
 
   const getHintText = () => {
     if (isStopping) return 'Ending session...';
@@ -43,7 +42,7 @@ export function Translator() {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Voice Translator</h1>
-        <p className={styles.subtitle}>English & Persian → Portuguese</p>
+        <p className={styles.subtitle}>Translate speech in real-time</p>
       </div>
 
       <div className={styles.languageSelector}>
@@ -55,6 +54,20 @@ export function Translator() {
           disabled={isActive || isConnecting}
         >
           {SOURCE_LANGUAGES.map((lang) => (
+            <option key={lang.value} value={lang.value}>
+              {lang.label}
+            </option>
+          ))}
+        </select>
+
+        <span className={styles.selectorLabel} style={{ marginLeft: '1rem' }}>Target:</span>
+        <select
+          className={styles.select}
+          value={targetLanguage}
+          onChange={(e) => setTargetLanguage(e.target.value as TargetLanguage)}
+          disabled={isActive || isConnecting}
+        >
+          {TARGET_LANGUAGES.map((lang) => (
             <option key={lang.value} value={lang.value}>
               {lang.label}
             </option>
@@ -81,7 +94,7 @@ export function Translator() {
           </p>
         </div>
         <div className={styles.transcriptBox}>
-          <span className={styles.transcriptLabel}>{TARGET_LANGUAGE_LABEL} (output)</span>
+          <span className={styles.transcriptLabel}>{targetLanguageLabel} (output)</span>
           <p className={styles.transcriptText}>
             {state.targetTranscript || '...'}
           </p>
