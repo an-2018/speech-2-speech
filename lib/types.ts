@@ -5,12 +5,13 @@ export type TranslationStatus =
   | 'error'
   | 'closed';
 
-export type SourceLanguage = 'en' | 'fa' | 'pt';
+export type SourceLanguage = 'en' | 'fa' | 'pt' | 'de';
 
 export const SOURCE_LANGUAGES: { value: SourceLanguage; label: string }[] = [
   { value: 'en', label: 'English' },
   { value: 'fa', label: 'Persian (Farsi)' },
   { value: 'pt', label: 'Portuguese' },
+  { value: 'de', label: 'German' },
 ];
 
 export type TargetLanguage = 'en' | 'pt' | 'de';

@@ -1,6 +1,6 @@
-# English | Persian → Portuguese Real-Time Voice Translator
+# English | Persian | German → Portuguese Real-Time Voice Translator
 
-A minimalist web application that translates English or Persian speech to Portuguese in real-time using OpenAI's `gpt-realtime-translate` model.
+A minimalist web application that translates English, Persian, or German speech to Portuguese in real-time using OpenAI's `gpt-realtime-translate` model.
 
 ![Tech Stack](https://img.shields.io/badge/Next.js-14-black)
 ![Tech Stack](https://img.shields.io/badge/OpenAI-Realtime%20API-purple)
@@ -9,7 +9,7 @@ A minimalist web application that translates English or Persian speech to Portug
 ## Features
 
 - Real-time speech-to-speech translation
-- Two source languages: **English** and **Persian (Farsi)**
+- Source languages: **English**, **Persian (Farsi)**, and **German**
 - Output to **Portuguese**
 - Live transcripts for both source and translated audio
 - Minimalist Vercel-style interface
@@ -91,7 +91,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 4. Test the Translation
 
-1. Select a source language (English or Persian) from the dropdown
+1. Select a source language (English, Persian, or German) from the dropdown
 2. **Hold** the microphone button while speaking
 3. Allow browser access to your microphone when prompted
 4. Release when done — your speech is translated to Portuguese
@@ -132,6 +132,52 @@ vercel env add OPENAI_API_KEY
 ### After Deployment
 
 The app requires your OpenAI API key to function. Make sure to add `OPENAI_API_KEY` as an environment variable in your Vercel project settings.
+
+## GitHub Actions Deployment (CI/CD)
+
+This project contains a GitHub Actions workflow (`.github/workflows/deploy-vercel.yaml`) to automatically build and deploy the application to Vercel on push to the `main` branch.
+
+To enable this workflow, you need to configure the following secrets in your GitHub repository:
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+- `VERCEL_TOKEN`
+
+### How to Get These Variables
+
+#### 1. `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`
+
+* **Option A: Via Vercel CLI (Recommended)**
+  1. In your local project directory, run:
+     ```bash
+     vercel link
+     ```
+     *(If Vercel CLI is not installed globally, you can run `npx vercel link` instead)*
+  2. Follow the interactive prompts to link the project to your Vercel account.
+  3. Once linked, a `.vercel/project.json` file is created in your project root.
+  4. Open `.vercel/project.json` and copy:
+     - `orgId` value (use this for `VERCEL_ORG_ID`)
+     - `projectId` value (use this for `VERCEL_PROJECT_ID`)
+
+* **Option B: Via Vercel Web Dashboard**
+  - **`VERCEL_ORG_ID`**: Go to your Vercel Team/Account Settings page. The ID is listed as the Team/Account ID under General/Billing (or in the browser's URL path after `/settings/`).
+  - **`VERCEL_PROJECT_ID`**: Go to your Vercel Project dashboard → **Settings** → **General** and copy the **Project ID** value.
+
+#### 2. `VERCEL_TOKEN`
+
+1. Go to [vercel.com/account/tokens](https://vercel.com/account/tokens).
+2. Click **Create** to generate a new Personal Access Token.
+3. Enter a descriptive name (e.g., `GitHub Actions Deploy Token`) and choose the appropriate scope (your personal account or target team).
+4. Click **Create**, then copy the generated token immediately.
+
+### How to Configure Secrets in GitHub
+
+1. Go to your repository on GitHub.
+2. Click on **Settings** → **Secrets and variables** → **Actions** in the left sidebar.
+3. Click **New repository secret**.
+4. Create the following repository secrets with the exact names and their respective values:
+   - `VERCEL_ORG_ID`
+   - `VERCEL_PROJECT_ID`
+   - `VERCEL_TOKEN`
 
 ## Usage Tips
 
